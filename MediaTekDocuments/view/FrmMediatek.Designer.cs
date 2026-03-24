@@ -2491,6 +2491,7 @@ namespace MediaTekDocuments.view
             this.dgvCommandeDvdListe.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.dgvCommandeDvdListe.Size = new System.Drawing.Size(694, 134);
             this.dgvCommandeDvdListe.TabIndex = 52;
+            this.dgvCommandeDvdListe.ColumnHeaderMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dgvCommandesListeDvd_ColumnHeaderMouseClick);
             // 
             // txbCommandeDvdCheminImage
             // 

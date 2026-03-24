@@ -1244,6 +1244,7 @@ namespace MediaTekDocuments.view
         #region Onglet Commandes (Livres)
         private readonly BindingSource bdgCommandesListeLivre = new BindingSource();
         private List<Commande> lesCommandesLivre = new List<Commande>();
+        private bool triAscendant = true;
         const string ETAPESUIVI = "1";
 
         /// <summary>
@@ -1461,21 +1462,35 @@ namespace MediaTekDocuments.view
         {
             string titreColonne = dgvCommandeLivresListe.Columns[e.ColumnIndex].HeaderText;
             List<Commande> sortedList = new List<Commande>();
+
             switch (titreColonne)
             {
                 case "DateCommande":
-                    sortedList = lesCommandesLivre.OrderBy(o => o.DateCommande).Reverse().ToList();
+                    sortedList = triAscendant
+                        ? lesCommandesLivre.OrderBy(o => o.DateCommande).ToList()
+                        : lesCommandesLivre.OrderByDescending(o => o.DateCommande).ToList();
                     break;
+
                 case "Montant":
-                    sortedList = lesCommandesLivre.OrderBy(o => o.Montant).Reverse().ToList();
+                    sortedList = triAscendant
+                        ? lesCommandesLivre.OrderBy(o => o.Montant).ToList()
+                        : lesCommandesLivre.OrderByDescending(o => o.Montant).ToList();
                     break;
+
                 case "NbExemplaire":
-                    sortedList = lesCommandesLivre.OrderBy(o => o.NbExemplaire).Reverse().ToList();
+                    sortedList = triAscendant
+                        ? lesCommandesLivre.OrderBy(o => o.NbExemplaire).ToList()
+                        : lesCommandesLivre.OrderByDescending(o => o.NbExemplaire).ToList();
                     break;
-                case "IdSuivi":
-                    sortedList = lesCommandesLivre.OrderBy(o => o.IdSuivi).Reverse().ToList();
+
+                case "EtapeSuivi":
+                    sortedList = triAscendant
+                        ? lesCommandesLivre.OrderBy(o => o.IdSuivi).ToList()
+                        : lesCommandesLivre.OrderByDescending(o => o.IdSuivi).ToList();
                     break;
             }
+
+            triAscendant = !triAscendant;
             RemplirCommandeLivreListe(sortedList);
         }
 
@@ -1831,6 +1846,47 @@ namespace MediaTekDocuments.view
                 // Rafraîchir la liste après suppression
                 RemplirCommandeDvdListe(controller.GetLesCommandes(commande.IdLivreDvd));
             }
+        }
+
+        /// <summary>
+        /// Tri sur une colonne
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void dgvCommandesListeDvd_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            string titreColonne = dgvCommandeDvdListe.Columns[e.ColumnIndex].HeaderText;
+            List<Commande> sortedList = new List<Commande>();
+
+            switch (titreColonne)
+            {
+                case "DateCommande":
+                    sortedList = triAscendant
+                        ? lesCommandesDvd.OrderBy(o => o.DateCommande).ToList()
+                        : lesCommandesDvd.OrderByDescending(o => o.DateCommande).ToList();
+                    break;
+
+                case "Montant":
+                    sortedList = triAscendant
+                        ? lesCommandesDvd.OrderBy(o => o.Montant).ToList()
+                        : lesCommandesDvd.OrderByDescending(o => o.Montant).ToList();
+                    break;
+
+                case "NbExemplaire":
+                    sortedList = triAscendant
+                        ? lesCommandesDvd.OrderBy(o => o.NbExemplaire).ToList()
+                        : lesCommandesDvd.OrderByDescending(o => o.NbExemplaire).ToList();
+                    break;
+
+                case "EtapeSuivi":
+                    sortedList = triAscendant
+                        ? lesCommandesDvd.OrderBy(o => o.IdSuivi).ToList()
+                        : lesCommandesDvd.OrderByDescending(o => o.IdSuivi).ToList();
+                    break;
+            }
+
+            triAscendant = !triAscendant;
+            RemplirCommandeDvdListe(sortedList);
         }
 
         #endregion
