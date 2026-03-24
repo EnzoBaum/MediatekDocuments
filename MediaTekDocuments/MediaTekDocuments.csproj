@@ -64,6 +64,26 @@
     <Compile Include="manager\ApiRest.cs" />
     <Compile Include="controller\FrmMediatekController.cs" />
     <Compile Include="dal\Access.cs" />
+    <Compile Include="model\Suivi.cs" />
+    <Compile Include="model\Commande.cs" />
+    <Compile Include="view\FrmModifCmdDvd.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="view\FrmModifCmdDvd.Designer.cs">
+      <DependentUpon>FrmModifCmdDvd.cs</DependentUpon>
+    </Compile>
+    <Compile Include="view\FrmConfirmationSupprCmdLivre.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="view\FrmConfirmationSupprCmdLivre.Designer.cs">
+      <DependentUpon>FrmConfirmationSupprCmdLivre.cs</DependentUpon>
+    </Compile>
+    <Compile Include="view\FrmModifCmdLivre.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="view\FrmModifCmdLivre.Designer.cs">
+      <DependentUpon>FrmModifCmdLivre.cs</DependentUpon>
+    </Compile>
     <Compile Include="view\FrmMediatek.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -92,6 +112,15 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="view\FrmModifCmdDvd.resx">
+      <DependentUpon>FrmModifCmdDvd.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="view\FrmConfirmationSupprCmdLivre.resx">
+      <DependentUpon>FrmConfirmationSupprCmdLivre.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="view\FrmModifCmdLivre.resx">
+      <DependentUpon>FrmModifCmdLivre.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="view\FrmMediatek.resx">
       <DependentUpon>FrmMediatek.cs</DependentUpon>
     </EmbeddedResource>

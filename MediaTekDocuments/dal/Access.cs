@@ -130,7 +130,6 @@ namespace MediaTekDocuments.dal
             return lesRevues;
         }
 
-
         /// <summary>
         /// Retourne les exemplaires d'une revue
         /// </summary>
@@ -141,6 +140,72 @@ namespace MediaTekDocuments.dal
             String jsonIdDocument = convertToJson("id", idDocument);
             List<Exemplaire> lesExemplaires = TraitementRecup<Exemplaire>(GET, "exemplaire/" + jsonIdDocument, null);
             return lesExemplaires;
+        }
+
+        /// <summary>
+        /// Retourne la ou les commande(s) d'un livre ou d'un dvd
+        /// </summary>
+        /// <param name="idDocument">id du livre concernée</param>
+        /// <returns>Liste d'objets Commande</returns>
+        public List<Commande> GetAllCommandes(string idDocument)
+        {
+            // Récupère les informations de la table commandeDocument
+            String jsonIdDocument = convertToJson("idLivreDvd", idDocument);
+            List<Commande> lesCommandesDoc = TraitementRecup<Commande>(GET, "commandeDocument/" + jsonIdDocument, null);
+
+            // Récupère les informations de la table commande
+            List<Commande> lesCommandes = TraitementRecup<Commande>(GET, "commande", null);
+
+            // Fusionne les informations des deux tables
+            foreach (var commandeDoc in lesCommandesDoc)
+            {
+                var commande = lesCommandes.Find(c => c.Id == commandeDoc.Id);
+                if (commande != null)
+                {
+                    commande.NbExemplaire = commandeDoc.NbExemplaire;
+                    commande.IdSuivi = commandeDoc.IdSuivi;
+                    commande.IdLivreDvd = commandeDoc.IdLivreDvd;
+                }
+            }
+
+            return lesCommandes.FindAll(c => lesCommandesDoc.Exists(cd => cd.Id == c.Id));
+        }
+
+        /// <summary>
+        /// Retourne toutes les commandes (tous livres confondus)
+        /// </summary>
+        /// <returns>Liste d'objets Commande</returns>
+        public List<Commande> GetToutesLesCommandes()
+        {
+            // Récupère toutes les commandes (sans filtrer par idDocument)
+            List<Commande> lesCommandes = TraitementRecup<Commande>(GET, "commande", null);
+
+            // Récupère tous les documents associés
+            List<Commande> lesCommandesDoc = TraitementRecup<Commande>(GET, "commandeDocument", null);
+
+            // Fusionne les informations des deux tables
+            foreach (var commande in lesCommandes)
+            {
+                var commandeDoc = lesCommandesDoc.Find(cd => cd.Id == commande.Id);
+                if (commandeDoc != null)
+                {
+                    commande.NbExemplaire = commandeDoc.NbExemplaire;
+                    commande.IdSuivi = commandeDoc.IdSuivi;
+                    commande.IdLivreDvd = commandeDoc.IdLivreDvd;
+                }
+            }
+
+            return lesCommandes;
+        }
+
+        /// <summary>
+        /// Retourne les étapes de suivi d'une commande
+        /// </summary>
+        /// <returns>Liste d'objets Suivi</returns>
+        public List<Suivi> GetLesSuivis()
+        {
+            List<Suivi> lesSuivis = TraitementRecup<Suivi>(GET, "suivi", null);
+            return lesSuivis;
         }
 
         /// <summary>
@@ -161,6 +226,122 @@ namespace MediaTekDocuments.dal
                 Console.WriteLine(ex.Message);
             }
             return false;
+        }
+
+        /// <summary>
+        /// Création d'une commande en base de données
+        /// </summary>
+        /// <param name="commande">commande à insérer</param>
+        /// <returns>true si l'insertion a pu se faire (retour != null)</returns>
+        public bool CreerCommande(Commande commande)
+        {
+            try
+            {
+                // Création du JSON pour la table commande
+                var jsonCommande = new
+                {
+                    id = commande.Id,
+                    dateCommande = commande.DateCommande.ToString("yyyy-MM-dd"),
+                    montant = commande.Montant
+                };
+
+                string jsonCommandeStr = JsonConvert.SerializeObject(jsonCommande);
+                List<Commande> listeCommande = TraitementRecup<Commande>(
+                    POST, "commande", "champs=" + jsonCommandeStr
+                );
+
+                if (listeCommande == null)
+                {
+                    Console.WriteLine("Erreur lors du POST sur la table commande");
+                    return false;
+                }
+
+                // Création du JSON pour la table commandeDocument
+                var jsonCommandeDoc = new
+                {
+                    id = commande.Id,
+                    nbExemplaire = commande.NbExemplaire,
+                    idLivreDvd = commande.IdLivreDvd,
+                    idSuivi = int.Parse(commande.IdSuivi)
+                };
+
+                string jsonCommandeDocStr = JsonConvert.SerializeObject(jsonCommandeDoc);
+                List<Commande> listeCommandeDoc = TraitementRecup<Commande>(
+                    POST, "commandeDocument", "champs=" + jsonCommandeDocStr
+                );
+
+                if (listeCommandeDoc == null)
+                {
+                    Console.WriteLine("Erreur lors du POST sur la table commandeDocument");
+                    return false;
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Erreur lors de la création de la commande : " + ex.Message);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Modifie l'étape de suivi d'une commande
+        /// </summary>
+        /// <param name="idCommande"></param>
+        /// <param name="idSuivi"></param>
+        public void ModifierSuiviCommande(string idCommande, string idSuivi)
+        {
+            try
+            {
+                // Création du JSON avec les champs à mettre à jour
+                var jsonChamps = new
+                {
+                    idSuivi = int.Parse(idSuivi)
+                };
+
+                string jsonStr = JsonConvert.SerializeObject(jsonChamps);
+
+                // Passage de l'id de la commande dans l'URL pour la liaison avec l'API
+                TraitementRecup<Commande>(
+                    "PUT",
+                    "commandeDocument/" + idCommande,
+                    "champs=" + jsonStr
+                );
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Erreur lors de la modification du suivi : " + ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Supprime une commande
+        /// </summary>
+        /// <param name="idCommande"></param>
+        public void SupprimerCommande(string idCommande)
+        {
+            try
+            {
+                // Suppression dans commandeDocument
+                string jsonId = convertToJson("id", idCommande);
+                TraitementRecup<Commande>(
+                    "DELETE",
+                    "commandeDocument/" + jsonId,
+                    null
+                );
+
+                // Suppression dans commande
+                TraitementRecup<Commande>(
+                    "DELETE",
+                    "commande/" + jsonId,
+                    null
+                );
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Erreur suppression commande : " + ex.Message);
+            }
         }
 
         /// <summary>
